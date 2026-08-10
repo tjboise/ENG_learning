@@ -39,42 +39,47 @@ export default function SignupPage() {
 
   if (done) {
     return (
-      <div className="flex flex-1 items-center justify-center px-4">
-        <p className="max-w-sm text-center text-sm">
-          注册成功，请查收邮件完成验证后再登录。
-        </p>
+      <div className="flex flex-1 items-center justify-center bg-background px-4">
+        <div className="w-full max-w-sm space-y-2 rounded-2xl border border-border bg-surface p-8 text-center shadow-sm">
+          <div className="text-2xl">📬</div>
+          <p className="text-sm">注册成功，请查收邮件完成验证后再登录。</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center px-4">
+    <div className="flex flex-1 items-center justify-center bg-background px-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm space-y-4 rounded-xl border border-black/10 p-6 dark:border-white/10"
+        className="w-full max-w-sm space-y-5 rounded-2xl border border-border bg-surface p-8 shadow-sm"
       >
-        <h1 className="text-xl font-semibold">注册</h1>
+        <div className="space-y-1 text-center">
+          <div className="text-2xl">🗂️</div>
+          <h1 className="text-xl font-semibold">创建账号</h1>
+          <p className="text-sm text-muted">开始记录你学到的单词和句子</p>
+        </div>
 
         <div className="space-y-1">
-          <label className="block text-sm">邮箱</label>
+          <label className="block text-sm text-muted">邮箱</label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-black/15 px-3 py-2 dark:border-white/20"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 outline-none transition-colors focus:border-accent"
           />
         </div>
 
         <div className="space-y-1">
-          <label className="block text-sm">密码</label>
+          <label className="block text-sm text-muted">密码</label>
           <input
             type="password"
             required
             minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border border-black/15 px-3 py-2 dark:border-white/20"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 outline-none transition-colors focus:border-accent"
           />
         </div>
 
@@ -83,14 +88,14 @@ export default function SignupPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md bg-black px-3 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black"
+          className="w-full rounded-lg bg-accent px-3 py-2.5 font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {loading ? "注册中…" : "注册"}
         </button>
 
-        <p className="text-center text-sm text-black/60 dark:text-white/60">
+        <p className="text-center text-sm text-muted">
           已有账号？{" "}
-          <Link href="/login" className="underline">
+          <Link href="/login" className="text-accent hover:underline">
             去登录
           </Link>
         </p>

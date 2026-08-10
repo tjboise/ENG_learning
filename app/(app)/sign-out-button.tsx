@@ -16,7 +16,7 @@ export function SignOutButton() {
   return (
     <button
       onClick={handleSignOut}
-      className="text-sm text-black/60 underline hover:text-black dark:text-white/60 dark:hover:text-white"
+      className="text-sm text-muted transition-colors hover:text-foreground"
     >
       退出登录
     </button>

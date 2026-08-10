@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "./sign-out-button";
+import { NavLinks } from "./nav-links";
 
 export default async function AppLayout({
   children,
@@ -14,27 +15,22 @@ export default async function AppLayout({
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex items-center justify-between border-b border-black/10 px-4 py-3 dark:border-white/10">
-        <nav className="flex items-center gap-4 text-sm">
-          <Link href="/" className="font-semibold">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/90 px-4 py-3 backdrop-blur sm:px-6">
+        <div className="flex items-center gap-5">
+          <Link href="/" className="flex items-center gap-1.5 font-semibold tracking-tight">
+            <span className="text-lg">🗂️</span>
             记词
           </Link>
-          <Link href="/" className="text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white">
-            记一笔
-          </Link>
-          <Link href="/cards" className="text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white">
-            卡片列表
-          </Link>
-          <Link href="/review" className="text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white">
-            复习
-          </Link>
-        </nav>
+          <NavLinks />
+        </div>
         <div className="flex items-center gap-3 text-sm">
-          <span className="text-black/50 dark:text-white/50">{user?.email}</span>
+          <span className="hidden text-muted sm:inline">{user?.email}</span>
           <SignOutButton />
         </div>
       </header>
-      <main className="flex flex-1 flex-col px-4 py-6">{children}</main>
+      <main className="mx-auto flex w-full flex-1 flex-col px-4 py-8 sm:px-6">
+        {children}
+      </main>
     </div>
   );
 }

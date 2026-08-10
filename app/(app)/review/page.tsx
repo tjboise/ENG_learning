@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { nextReviewState, QUALITY, type ReviewQuality } from "@/lib/review";
+import { TYPE_ICONS, TYPE_LABELS } from "@/lib/card-meta";
 import type { Card } from "@/lib/types";
 
 const ANSWER_BUTTONS: {
@@ -13,22 +14,22 @@ const ANSWER_BUTTONS: {
   {
     label: "忘记了",
     quality: QUALITY.AGAIN,
-    className: "border border-red-300 text-red-700 dark:border-red-800 dark:text-red-400",
+    className: "bg-red-500 text-white hover:bg-red-600",
   },
   {
     label: "有点难",
     quality: QUALITY.HARD,
-    className: "border border-black/15 dark:border-white/20",
+    className: "bg-amber-500 text-white hover:bg-amber-600",
   },
   {
     label: "记得",
     quality: QUALITY.GOOD,
-    className: "border border-black/15 dark:border-white/20",
+    className: "bg-accent text-accent-foreground hover:opacity-90",
   },
   {
     label: "很简单",
     quality: QUALITY.EASY,
-    className: "bg-black text-white dark:bg-white dark:text-black",
+    className: "bg-emerald-500 text-white hover:bg-emerald-600",
   },
 ];
 
@@ -88,16 +89,17 @@ export default function ReviewPage() {
   }
 
   if (queue === null) {
-    return <p className="text-sm text-black/50 dark:text-white/50">加载中…</p>;
+    return <p className="text-sm text-muted">加载中…</p>;
   }
 
   if (queue.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-md text-center">
-        <p className="text-lg font-medium">
-          {doneCount > 0 ? "今天的复习完成了 🎉" : "今天没有到期的卡片"}
+      <div className="mx-auto w-full max-w-md rounded-2xl border border-border bg-surface p-10 text-center shadow-sm">
+        <p className="text-3xl">{doneCount > 0 ? "🎉" : "☕️"}</p>
+        <p className="mt-2 text-lg font-medium">
+          {doneCount > 0 ? "今天的复习完成了" : "今天没有到期的卡片"}
         </p>
-        <p className="mt-2 text-sm text-black/50 dark:text-white/50">
+        <p className="mt-1 text-sm text-muted">
           {doneCount > 0
             ? `本次复习了 ${doneCount} 张卡片`
             : "去「记一笔」里加点新内容，或者等下一批卡片到期"}
@@ -107,45 +109,60 @@ export default function ReviewPage() {
   }
 
   const current = queue[0];
+  const total = doneCount + queue.length;
 
   return (
     <div className="mx-auto w-full max-w-md space-y-4">
-      <p className="text-sm text-black/50 dark:text-white/50">
-        待复习 {queue.length} 张
-      </p>
-
-      <div className="min-h-64 space-y-3 rounded-xl border border-black/10 p-6 dark:border-white/10">
-        <div className="flex items-center justify-between">
-          <p className="text-xl font-semibold">{current.input_text}</p>
-          <span className="text-xs text-black/40 dark:text-white/40">
-            已记忆 {current.review_count} 次
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between text-sm text-muted">
+          <span>待复习 {queue.length} 张</span>
+          <span>
+            {doneCount} / {total}
           </span>
         </div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-border">
+          <div
+            className="h-full rounded-full bg-accent transition-all"
+            style={{ width: `${(doneCount / total) * 100}%` }}
+          />
+        </div>
+      </div>
 
-        {revealed ? (
-          <div className="space-y-3 pt-2">
-            <p className="text-sm">{current.meaning_zh}</p>
+      <div className="flip-card h-80" onClick={() => !revealed && setRevealed(true)}>
+        <div className={`flip-card-inner ${revealed ? "is-flipped" : ""}`}>
+          <div className="flip-card-face flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-surface p-6 text-center shadow-sm">
+            {current.input_type && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2.5 py-1 text-xs text-accent">
+                {TYPE_ICONS[current.input_type]}{" "}
+                {TYPE_LABELS[current.input_type] ?? current.input_type}
+              </span>
+            )}
+            <p className="text-2xl font-semibold">{current.input_text}</p>
+            <p className="text-xs text-muted">
+              已记忆 {current.review_count} 次
+            </p>
+            <span className="mt-2 rounded-lg border border-border px-4 py-2 text-sm text-muted">
+              点击显示答案
+            </span>
+          </div>
+
+          <div className="flip-card-face flip-card-back flex flex-col gap-3 rounded-2xl border border-border bg-surface p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted">
+              {current.input_text}
+            </p>
+            <p className="text-base">{current.meaning_zh}</p>
             {current.usage_notes && (
-              <p className="text-sm text-black/60 dark:text-white/60">
-                {current.usage_notes}
-              </p>
+              <p className="text-sm text-muted">{current.usage_notes}</p>
             )}
             {current.examples?.length > 0 && (
-              <ul className="list-disc space-y-0.5 pl-5 text-sm text-black/70 dark:text-white/70">
+              <ul className="list-disc space-y-0.5 pl-5 text-sm text-foreground/80">
                 {current.examples.map((ex, i) => (
                   <li key={i}>{ex}</li>
                 ))}
               </ul>
             )}
           </div>
-        ) : (
-          <button
-            onClick={() => setRevealed(true)}
-            className="rounded-md border border-black/15 px-4 py-2 text-sm dark:border-white/20"
-          >
-            显示答案
-          </button>
-        )}
+        </div>
       </div>
 
       {revealed && (
@@ -155,7 +172,7 @@ export default function ReviewPage() {
               key={label}
               onClick={() => handleAnswer(quality)}
               disabled={updating}
-              className={`rounded-md px-2 py-2 text-sm disabled:opacity-50 ${className}`}
+              className={`rounded-lg px-2 py-2.5 text-sm font-medium transition-opacity disabled:opacity-50 ${className}`}
             >
               {label}
             </button>
