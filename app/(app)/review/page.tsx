@@ -2,8 +2,35 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { nextBoxState } from "@/lib/review";
+import { nextReviewState, QUALITY, type ReviewQuality } from "@/lib/review";
 import type { Card } from "@/lib/types";
+
+const ANSWER_BUTTONS: {
+  label: string;
+  quality: ReviewQuality;
+  className: string;
+}[] = [
+  {
+    label: "忘记了",
+    quality: QUALITY.AGAIN,
+    className: "border border-red-300 text-red-700 dark:border-red-800 dark:text-red-400",
+  },
+  {
+    label: "有点难",
+    quality: QUALITY.HARD,
+    className: "border border-black/15 dark:border-white/20",
+  },
+  {
+    label: "记得",
+    quality: QUALITY.GOOD,
+    className: "border border-black/15 dark:border-white/20",
+  },
+  {
+    label: "很简单",
+    quality: QUALITY.EASY,
+    className: "bg-black text-white dark:bg-white dark:text-black",
+  },
+];
 
 export default function ReviewPage() {
   const [queue, setQueue] = useState<Card[] | null>(null);
@@ -26,17 +53,28 @@ export default function ReviewPage() {
     loadQueue();
   }, [loadQueue]);
 
-  async function handleAnswer(remembered: boolean) {
+  async function handleAnswer(quality: ReviewQuality) {
     if (!queue || queue.length === 0) return;
     const current = queue[0];
     setUpdating(true);
 
-    const { box, nextReviewAt } = nextBoxState(current.box, remembered);
+    const { easeFactor, intervalDays, repetitions, nextReviewAt } =
+      nextReviewState(
+        {
+          easeFactor: current.ease_factor,
+          intervalDays: current.interval_days,
+          repetitions: current.repetitions,
+        },
+        quality
+      );
+
     const supabase = createClient();
     await supabase
       .from("cards")
       .update({
-        box,
+        ease_factor: easeFactor,
+        interval_days: intervalDays,
+        repetitions: repetitions,
         next_review_at: nextReviewAt,
         last_reviewed_at: new Date().toISOString(),
         review_count: current.review_count + 1,
@@ -77,7 +115,12 @@ export default function ReviewPage() {
       </p>
 
       <div className="min-h-64 space-y-3 rounded-xl border border-black/10 p-6 dark:border-white/10">
-        <p className="text-xl font-semibold">{current.input_text}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-xl font-semibold">{current.input_text}</p>
+          <span className="text-xs text-black/40 dark:text-white/40">
+            已记忆 {current.review_count} 次
+          </span>
+        </div>
 
         {revealed ? (
           <div className="space-y-3 pt-2">
@@ -106,21 +149,17 @@ export default function ReviewPage() {
       </div>
 
       {revealed && (
-        <div className="flex gap-3">
-          <button
-            onClick={() => handleAnswer(false)}
-            disabled={updating}
-            className="flex-1 rounded-md border border-black/15 px-4 py-2 text-sm disabled:opacity-50 dark:border-white/20"
-          >
-            不记得
-          </button>
-          <button
-            onClick={() => handleAnswer(true)}
-            disabled={updating}
-            className="flex-1 rounded-md bg-black px-4 py-2 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black"
-          >
-            记得
-          </button>
+        <div className="grid grid-cols-4 gap-2">
+          {ANSWER_BUTTONS.map(({ label, quality, className }) => (
+            <button
+              key={label}
+              onClick={() => handleAnswer(quality)}
+              disabled={updating}
+              className={`rounded-md px-2 py-2 text-sm disabled:opacity-50 ${className}`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       )}
     </div>

@@ -10,7 +10,9 @@ export interface Card {
   usage_notes: string | null;
   examples: string[];
   source_note: string | null;
-  box: number;
+  ease_factor: number;
+  interval_days: number;
+  repetitions: number;
   next_review_at: string;
   last_reviewed_at: string | null;
   review_count: number;

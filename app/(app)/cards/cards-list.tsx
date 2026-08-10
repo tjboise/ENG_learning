@@ -54,7 +54,7 @@ export function CardsList({ cards }: { cards: Card[] }) {
                 </span>
               )}
               <span className="text-xs text-black/40 dark:text-white/40">
-                box {card.box}
+                已记忆 {card.review_count} 次
               </span>
             </div>
             <p className="text-sm">{card.meaning_zh}</p>
