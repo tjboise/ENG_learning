@@ -56,7 +56,7 @@ body {
   transform-style: preserve-3d;
 }
 
-.flip-card.is-flipped .flip-card-inner {
+.flip-card-inner.is-flipped {
   transform: rotateY(180deg);
 }
 
