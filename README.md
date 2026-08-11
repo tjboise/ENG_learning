@@ -3,14 +3,17 @@
 看美剧时随手记下的生词、俚语、句子，AI 自动生成卡片（含义、日常用法、例句），并用 SM-2（遗忘曲线）算法安排复习，每天早上邮件提醒到期的卡片，避免"记了就忘"。
 
 - 前端/后端：Next.js（App Router + TypeScript）+ Tailwind CSS
-- 数据库 + 登录：[Supabase](https://supabase.com)（Postgres，邮箱/密码登录，Row Level Security 保证每个用户只看到自己的卡片）
+- 数据库 + 登录：[Supabase](https://supabase.com)（Postgres，邮箱/密码登录，Row Level Security 保证每个用户默认只看到自己的卡片）
 - AI 生成：调用实验室内部 LLM 网关（[lab_llm_api](https://github.com/tjboise/lab_llm_api)，OpenAI 兼容接口，模型 `qwen3-32b`）
 - 每日复习提醒：Vercel Cron 每天北京时间 8:00 触发，通过 Gmail SMTP 给有到期卡片的用户发邮件
+- 排行榜：`/leaderboard` 按北京时间统计每个注册用户今天记录/复习了多少张卡片并排名，点进某个人可以看到 ta 的全部卡片内容
 - 部署：Vercel
 
 ## 已知依赖 / 风险
 
 AI 生成卡片依赖实验室本地机器 + ngrok 隧道（`LAB_LLM_BASE_URL`）保持在线。如果那台机器关机或隧道断开，**新建卡片会失败**，但已保存的卡片、卡片列表、复习功能不受影响（数据都在 Supabase）。
+
+排行榜功能会用 `SUPABASE_SERVICE_ROLE_KEY` 绕过 Row Level Security，让每个登录用户都能看到其他所有注册用户的卡片内容和邮箱——这是刻意为之（方便互相学习/比较进度），但意味着这个 app 里已经没有"用户之间彼此隐私隔离"这件事了，只适合邀请信任的人注册。
 
 ## 本地开发
 

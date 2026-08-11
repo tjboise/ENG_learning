@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/", label: "记一笔" },
   { href: "/cards", label: "卡片列表" },
   { href: "/review", label: "复习" },
+  { href: "/leaderboard", label: "排行榜" },
 ];
 
 export function NavLinks() {
@@ -15,7 +16,8 @@ export function NavLinks() {
   return (
     <nav className="flex items-center gap-1 text-sm">
       {LINKS.map(({ href, label }) => {
-        const active = pathname === href;
+        const active =
+          href === "/" ? pathname === href : pathname.startsWith(href);
         return (
           <Link
             key={href}
