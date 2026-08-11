@@ -1,21 +1,17 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-
-function dateKey(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
+import { beijingDateKey } from "./timezone";
 
 function computeStreak(reviewDates: Set<string>): number {
   const cursor = new Date();
-  cursor.setUTCHours(0, 0, 0, 0);
 
-  if (!reviewDates.has(dateKey(cursor))) {
+  if (!reviewDates.has(beijingDateKey(cursor))) {
     // Haven't reviewed yet today — the streak still counts if it was
     // kept up through yesterday.
     cursor.setUTCDate(cursor.getUTCDate() - 1);
   }
 
   let streak = 0;
-  while (reviewDates.has(dateKey(cursor))) {
+  while (reviewDates.has(beijingDateKey(cursor))) {
     streak += 1;
     cursor.setUTCDate(cursor.getUTCDate() - 1);
   }
@@ -29,7 +25,7 @@ export async function getUserStats(supabase: SupabaseClient) {
   ]);
 
   const reviewDates = new Set(
-    (reviewRows ?? []).map((row) => dateKey(new Date(row.last_reviewed_at as string)))
+    (reviewRows ?? []).map((row) => beijingDateKey(new Date(row.last_reviewed_at as string)))
   );
 
   return {

@@ -1,18 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-
-const BEIJING_OFFSET_MS = 8 * 60 * 60 * 1000;
-
-// "今天" is defined in Beijing time, not UTC, so a card added at 7am
-// Beijing still counts toward the previous UTC day's boundary otherwise.
-function beijingDayRangeUtc(now = new Date()) {
-  const beijingNow = new Date(now.getTime() + BEIJING_OFFSET_MS);
-  const y = beijingNow.getUTCFullYear();
-  const m = beijingNow.getUTCMonth();
-  const d = beijingNow.getUTCDate();
-  const startUtc = new Date(Date.UTC(y, m, d) - BEIJING_OFFSET_MS);
-  const endUtc = new Date(startUtc.getTime() + 24 * 60 * 60 * 1000);
-  return { startUtc, endUtc };
-}
+import { beijingDayRangeUtc } from "./timezone";
 
 export interface LeaderboardEntry {
   userId: string;
