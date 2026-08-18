@@ -49,23 +49,16 @@ async function requestCard(
     ? `Text: ${inputText}\nSource/context (may help disambiguate): ${sourceNote}`
     : `Text: ${inputText}`;
 
-  // @ts-ignore - chat_template_kwargs is a gateway-specific field (disables
-  // Qwen3 thinking mode) that isn't in the OpenAI SDK's type definitions
   const stream = await client.chat.completions.create({
-    model: process.env.LAB_LLM_MODEL || "qwen3-32b",
+    model: process.env.LAB_LLM_MODEL || "gemini-2.5-flash",
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: userContent },
     ],
     max_tokens: 1024,
     stream: true,
-    chat_template_kwargs: { enable_thinking: false },
   });
 
-  // Streaming (rather than waiting for one big buffered response) keeps
-  // bytes flowing on the connection the whole time, so network hops between
-  // Vercel and the lab gateway don't mistake a long "thinking" pause for a
-  // dead connection and cut it.
   let raw = "";
   for await (const chunk of stream) {
     raw += chunk.choices[0]?.delta?.content ?? "";
@@ -93,8 +86,7 @@ export async function generateCard(
   try {
     return await requestCard(inputText, sourceNote);
   } catch {
-    // The lab LLM gateway (local machine + ngrok tunnel) occasionally drops
-    // the connection mid-generation; one retry recovers most of these.
+    // One retry to smooth over transient network/API errors.
     return await requestCard(inputText, sourceNote);
   }
 }
