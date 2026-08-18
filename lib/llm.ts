@@ -39,7 +39,7 @@ function extractJson(raw: string): string {
   return raw.trim();
 }
 
-export async function generateCard(
+async function requestCard(
   inputText: string,
   sourceNote?: string
 ): Promise<GeneratedCard> {
@@ -75,4 +75,17 @@ export async function generateCard(
   }
 
   return parsed;
+}
+
+export async function generateCard(
+  inputText: string,
+  sourceNote?: string
+): Promise<GeneratedCard> {
+  try {
+    return await requestCard(inputText, sourceNote);
+  } catch {
+    // The lab LLM gateway (local machine + ngrok tunnel) occasionally drops
+    // the connection mid-generation; one retry recovers most of these.
+    return await requestCard(inputText, sourceNote);
+  }
 }
