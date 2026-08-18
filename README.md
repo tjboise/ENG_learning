@@ -4,14 +4,12 @@
 
 - 前端/后端：Next.js（App Router + TypeScript）+ Tailwind CSS
 - 数据库 + 登录：[Supabase](https://supabase.com)（Postgres，邮箱/密码登录，Row Level Security 保证每个用户默认只看到自己的卡片）
-- AI 生成：调用实验室内部 LLM 网关（[lab_llm_api](https://github.com/tjboise/lab_llm_api)，OpenAI 兼容接口，模型 `qwen3-32b`）
+- AI 生成：调用 Gemini API（通过其 OpenAI 兼容接口，默认模型 `gemini-2.5-flash`）
 - 每日复习提醒：Vercel Cron 每天北京时间 8:00 触发，通过 Gmail SMTP 给有到期卡片的用户发邮件
 - 排行榜：`/leaderboard` 按北京时间统计每个注册用户今天记录/复习了多少张卡片并排名，点进某个人可以看到 ta 的全部卡片内容
 - 部署：Vercel
 
 ## 已知依赖 / 风险
-
-AI 生成卡片依赖实验室本地机器 + ngrok 隧道（`LAB_LLM_BASE_URL`）保持在线。如果那台机器关机或隧道断开，**新建卡片会失败**，但已保存的卡片、卡片列表、复习功能不受影响（数据都在 Supabase）。
 
 排行榜功能会用 `SUPABASE_SERVICE_ROLE_KEY` 绕过 Row Level Security，让每个登录用户都能看到其他所有注册用户的卡片内容和邮箱——这是刻意为之（方便互相学习/比较进度），但意味着这个 app 里已经没有"用户之间彼此隐私隔离"这件事了，只适合邀请信任的人注册。
 
@@ -31,9 +29,9 @@ npm run dev
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase 项目 URL（Project Settings → API） |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase 项目 anon public key |
-| `LAB_LLM_BASE_URL` | LLM 网关地址，默认 `https://improper-faceless-savanna.ngrok-free.dev/v1` |
-| `LAB_LLM_API_KEY` | LLM 网关的 API key（只在服务端使用，绝不暴露给浏览器） |
-| `LAB_LLM_MODEL` | 模型名，默认 `qwen3-32b` |
+| `LAB_LLM_BASE_URL` | LLM 网关地址，Gemini 的 OpenAI 兼容接口：`https://generativelanguage.googleapis.com/v1beta/openai/` |
+| `LAB_LLM_API_KEY` | Gemini API key（去 [Google AI Studio](https://aistudio.google.com/apikey) 生成；只在服务端使用，绝不暴露给浏览器） |
+| `LAB_LLM_MODEL` | 模型名，默认 `gemini-2.5-flash` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase `service_role` secret key（绕过 RLS，只在每日提醒的 cron 任务里用，**只能存在服务端**） |
 | `GMAIL_USER` | 用来发提醒邮件的 Gmail 地址 |
 | `GMAIL_APP_PASSWORD` | 该 Gmail 账号的应用专用密码（不是登录密码，见下面说明） |
