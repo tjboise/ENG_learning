@@ -49,6 +49,8 @@ async function requestCard(
     ? `Text: ${inputText}\nSource/context (may help disambiguate): ${sourceNote}`
     : `Text: ${inputText}`;
 
+  // @ts-ignore - chat_template_kwargs is a gateway-specific field (disables
+  // Qwen3 thinking mode) that isn't in the OpenAI SDK's type definitions
   const stream = await client.chat.completions.create({
     model: process.env.LAB_LLM_MODEL || "qwen3-32b",
     messages: [
@@ -57,7 +59,6 @@ async function requestCard(
     ],
     max_tokens: 1024,
     stream: true,
-    // @ts-ignore - gateway-specific field to disable Qwen3 thinking mode
     chat_template_kwargs: { enable_thinking: false },
   });
 
