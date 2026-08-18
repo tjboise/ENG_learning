@@ -49,18 +49,26 @@ async function requestCard(
     ? `Text: ${inputText}\nSource/context (may help disambiguate): ${sourceNote}`
     : `Text: ${inputText}`;
 
-  const completion = await client.chat.completions.create({
+  const stream = await client.chat.completions.create({
     model: process.env.LAB_LLM_MODEL || "qwen3-32b",
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: userContent },
     ],
     max_tokens: 1024,
+    stream: true,
     // @ts-expect-error - gateway-specific field to disable Qwen3 thinking mode
     chat_template_kwargs: { enable_thinking: false },
   });
 
-  const raw = completion.choices[0]?.message?.content ?? "";
+  // Streaming (rather than waiting for one big buffered response) keeps
+  // bytes flowing on the connection the whole time, so network hops between
+  // Vercel and the lab gateway don't mistake a long "thinking" pause for a
+  // dead connection and cut it.
+  let raw = "";
+  for await (const chunk of stream) {
+    raw += chunk.choices[0]?.delta?.content ?? "";
+  }
   const jsonText = extractJson(raw);
 
   let parsed: GeneratedCard;
