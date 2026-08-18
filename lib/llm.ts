@@ -57,7 +57,7 @@ async function requestCard(
     ],
     max_tokens: 1024,
     stream: true,
-    // @ts-expect-error - gateway-specific field to disable Qwen3 thinking mode
+    // @ts-ignore - gateway-specific field to disable Qwen3 thinking mode
     chat_template_kwargs: { enable_thinking: false },
   });
 
